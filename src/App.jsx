@@ -1,9 +1,14 @@
 // ! Notes at bottom
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const App = () => {
-	const [searchTerm, setSearchTerm] = useState('react');
+	const [searchTerm, setSearchTerm] = useState(localStorage.getItem('search') || 'React');
+
+	// When searchTerm changes
+	useEffect(() => {
+		localStorage.setItem('search', searchTerm);
+	}, [searchTerm]);
 
 	const stories = [
 		{
@@ -54,22 +59,22 @@ const Search = ({ search, onSearch }) => {
 const List = ({ list }) => {
 	return (
 		<ul>
-			{list.map(({ objectID, ...item }) => (
-				<Item key={objectID} {...item} />
+			{list.map((item) => (
+				<Item key={item.objectID} item={item} />
 			))}
 		</ul>
 	);
 };
 
-const Item = ({ title, url, author, num_comments, points }) => {
+const Item = ({ item }) => {
 	return (
 		<li>
 			<span>
-				<a href={url}>{title}</a>
+				<a href={item.url}>{item.title}</a>
 			</span>
-			<span>{author}</span>
-			<span>{num_comments}</span>
-			<span>{points}</span>
+			<span>{item.author}</span>
+			<span>{item.num_comments}</span>
+			<span>{item.points}</span>
 		</li>
 	);
 };
@@ -95,8 +100,15 @@ export default App;
   > CALLBACK HANDLER: Pass function from parent to child component via props - call func in child, but have implementation in parent.
 
   > SPREAD/REST OPERATORS: Utilize the spread/rest operator when passing props down components. Use the spread to avoid a lot of props being passed down in instantiation (i.e. <List name={item.name} url={item.url} etc. />) into <List {...item} /> and use the rest operator in maps to simplify keys and props:
-      {list.map(({ objectID, ...item }) => (
-				<Item key={objectID} {...item} />
-			))}
-        
+
+    {list.map(({ objectID, ...item }) => (
+      <Item key={objectID} {...item} />
+    ))}
+  
+  > PROPS HANDLING RULE OF THUMB: 
+    - Always use object destructuring for props
+    - Use spread operator when you want to pass all key/value pairs to a child component
+    - Use the rest operator only when you want to split out certain properties.
+    - Use nested destructuring only when it improves readability 
+
  */
