@@ -2,13 +2,18 @@
 
 import { useEffect, useState } from 'react';
 
-const App = () => {
-	const [searchTerm, setSearchTerm] = useState(localStorage.getItem('search') || 'React');
+const useStorageState = (key, initialState) => {
+	const [value, setValue] = useState(localStorage.getItem(key) || initialState);
 
-	// When searchTerm changes
 	useEffect(() => {
-		localStorage.setItem('search', searchTerm);
-	}, [searchTerm]);
+		localStorage.setItem(key, value);
+	}, [value, key]);
+
+	return [value, setValue];
+};
+
+const App = () => {
+	const [searchTerm, setSearchTerm] = useStorageState('search', 'React');
 
 	const stories = [
 		{
@@ -111,4 +116,10 @@ export default App;
     - Use the rest operator only when you want to split out certain properties.
     - Use nested destructuring only when it improves readability 
 
+  > USESTATE VS. USEEFFECT: useState is used for values that change over time; useEffect is used to opt into the lifecycle of componenets to introduce side-effects.
+
+  > CUSTOM HOOKS: Maintain conventions:
+    - custom hooks should begin with the `use-` prefix
+    - custom hooks should return an array (<STATE>, set<STATE>) 
+    - custom hooks should be reusable
  */
