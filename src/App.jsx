@@ -12,30 +12,38 @@ const useStorageState = (key, initialState) => {
 	return [value, setValue];
 };
 
+const initialStories = [
+	{
+		title: 'React',
+		url: 'https://reactjs.org/',
+		author: 'Jordan Walke',
+		num_comments: 3,
+		points: 4,
+		objectID: 0,
+	},
+	{
+		title: 'Redux',
+		url: 'https://redux.js.org/',
+		author: 'Dan Abramov, Andrew Clark',
+		num_comments: 2,
+		points: 5,
+		objectID: 1,
+	},
+];
+
 const App = () => {
 	const [searchTerm, setSearchTerm] = useStorageState('search', 'React');
 
-	const stories = [
-		{
-			title: 'React',
-			url: 'https://reactjs.org/',
-			author: 'Jordan Walke',
-			num_comments: 3,
-			points: 4,
-			objectID: 0,
-		},
-		{
-			title: 'Redux',
-			url: 'https://redux.js.org/',
-			author: 'Dan Abramov, Andrew Clark',
-			num_comments: 2,
-			points: 5,
-			objectID: 1,
-		},
-	];
-
 	// Callback handler, allows parent to see state of child
 	const handleSearch = (e) => setSearchTerm(e.target.value);
+
+	const [stories, setStories] = useState(initialStories);
+
+	const handleRemoveStory = (item) => {
+		const newStories = stories.filter((story) => item.objectID !== story.objectID);
+
+		setStories(newStories);
+	};
 
 	const searchedStories = stories.filter((story) => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -43,38 +51,42 @@ const App = () => {
 		<div>
 			<h1>My Hacker Stories</h1>
 
-			<InputWithLabel id="search" label="Search" value={searchTerm} onInputChange={handleSearch}>
+			<InputWithLabel id="search" label="Search" value={searchTerm} isFocused onInputChange={handleSearch}>
 				<strong>Search:</strong>
 			</InputWithLabel>
 
 			<hr />
 
-			<List list={searchedStories} />
+			<List list={searchedStories} onRemoveItem={handleRemoveStory} />
 		</div>
 	);
 };
 
-const InputWithLabel = ({ id, value, type = 'text', onInputChange, children }) => {
+const InputWithLabel = ({ id, value, type = 'text', onInputChange, isFocused, children }) => {
 	return (
 		<>
 			<label htmlFor={id}>{children}</label>
 			&nbsp;
-			<input id={id} type={type} value={value} onChange={onInputChange} />
+			<input id={id} type={type} value={value} autoFocus={isFocused} onChange={onInputChange} />
 		</>
 	);
 };
 
-const List = ({ list }) => {
+const List = ({ list, onRemoveItem }) => {
 	return (
 		<ul>
 			{list.map((item) => (
-				<Item key={item.objectID} item={item} />
+				<Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
 			))}
 		</ul>
 	);
 };
 
-const Item = ({ item }) => {
+const Item = ({ item, onRemoveItem }) => {
+	const handleRemoveItem = () => {
+		onRemoveItem(item);
+	};
+
 	return (
 		<li>
 			<span>
@@ -83,6 +95,11 @@ const Item = ({ item }) => {
 			<span>{item.author}</span>
 			<span>{item.num_comments}</span>
 			<span>{item.points}</span>
+			<span>
+				<button type="button" onClick={handleRemoveItem}>
+					Dismiss
+				</button>
+			</span>
 		</li>
 	);
 };
@@ -125,4 +142,6 @@ export default App;
     - custom hooks should begin with the `use-` prefix
     - custom hooks should return an array (<STATE>, set<STATE>) 
     - custom hooks should be reusable
+
+  > INLINE HANDLERS: Inline handlers are useful in child components when callback handlers require some sort of parameter, for example a current item. The `onClick` attribute returns the event object by default, but by using the inline handler, you can send specific information back
  */
