@@ -25,9 +25,7 @@ const App = () => {
 	];
 
 	// Callback handler, allows parent to see state of child
-	const handleSearch = (e) => {
-		setSearchTerm(e.target.value);
-	};
+	const handleSearch = (e) => setSearchTerm(e.target.value);
 
 	const searchedStories = stories.filter((story) => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -44,34 +42,34 @@ const App = () => {
 	);
 };
 
-const Search = (props) => {
+const Search = ({ search, onSearch }) => {
 	return (
 		<div>
 			<label htmlFor="search">Search: </label>
-			<input id="search" type="text" value={props.search} onChange={props.onSearch} />
+			<input id="search" type="text" value={search} onChange={onSearch} />
 		</div>
 	);
 };
 
-const List = (props) => {
+const List = ({ list }) => {
 	return (
 		<ul>
-			{props.list.map((item) => (
-				<Item key={item.objectID} item={item} />
+			{list.map(({ objectID, ...item }) => (
+				<Item key={objectID} {...item} />
 			))}
 		</ul>
 	);
 };
 
-const Item = (props) => {
+const Item = ({ title, url, author, num_comments, points }) => {
 	return (
 		<li>
 			<span>
-				<a href={props.item.url}>{props.item.title}</a>
+				<a href={url}>{title}</a>
 			</span>
-			<span>{props.item.author}</span>
-			<span>{props.item.num_comments}</span>
-			<span>{props.item.points}</span>
+			<span>{author}</span>
+			<span>{num_comments}</span>
+			<span>{points}</span>
 		</li>
 	);
 };
@@ -95,4 +93,10 @@ export default App;
   > COMPONENT DECLARATION: Components can be written as arrow functions, along with all methods and JSX within. You can even simply return HTML if no methods are needed in a component. BE CONSISTENT!
 
   > CALLBACK HANDLER: Pass function from parent to child component via props - call func in child, but have implementation in parent.
+
+  > SPREAD/REST OPERATORS: Utilize the spread/rest operator when passing props down components. Use the spread to avoid a lot of props being passed down in instantiation (i.e. <List name={item.name} url={item.url} etc. />) into <List {...item} /> and use the rest operator in maps to simplify keys and props:
+      {list.map(({ objectID, ...item }) => (
+				<Item key={objectID} {...item} />
+			))}
+        
  */
