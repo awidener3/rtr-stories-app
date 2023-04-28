@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 const App = () => {
-	console.log('App renders');
 	const stories = [
 		{
 			title: 'React',
@@ -23,11 +22,16 @@ const App = () => {
 		},
 	];
 
+	// Callback handler, allows parent to see state of child
+	const handleSearch = (e) => {
+		console.log(e.target.value);
+	};
+
 	return (
 		<div>
 			<h1>My Hacker Stories</h1>
 
-			<Search />
+			<Search onSearch={handleSearch} />
 
 			<hr />
 
@@ -36,11 +40,14 @@ const App = () => {
 	);
 };
 
-const Search = () => {
-	console.log('Search renders');
+const Search = (props) => {
 	const [searchTerm, setSearchTerm] = useState('');
 
-	const handleChange = (e) => setSearchTerm(e.target.value);
+	const handleChange = (e) => {
+		setSearchTerm(e.target.value);
+
+		props.onSearch(e);
+	};
 
 	return (
 		<div>
@@ -55,7 +62,6 @@ const Search = () => {
 };
 
 const List = (props) => {
-	console.log('List renders');
 	return (
 		<ul>
 			{props.list.map((item) => (
@@ -66,7 +72,6 @@ const List = (props) => {
 };
 
 const Item = (props) => {
-	console.log('Item renders');
 	return (
 		<li>
 			<span>
@@ -96,4 +101,6 @@ export default App;
   > COMPONENT HIERARCHIES/TREES: A parent-child tree that begins with the "entry point component" (AKA App.jsx).
 
   > COMPONENT DECLARATION: Components can be written as arrow functions, along with all methods and JSX within. You can even simply return HTML if no methods are needed in a component. BE CONSISTENT!
+
+  > CALLBACK HANDLER: Pass function from parent to child component via props - call func in child, but have implementation in parent.
  */
