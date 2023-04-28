@@ -3,6 +3,8 @@
 import { useState } from 'react';
 
 const App = () => {
+	const [searchTerm, setSearchTerm] = useState('');
+
 	const stories = [
 		{
 			title: 'React',
@@ -24,38 +26,32 @@ const App = () => {
 
 	// Callback handler, allows parent to see state of child
 	const handleSearch = (e) => {
-		console.log(e.target.value);
+		setSearchTerm(e.target.value);
 	};
+
+	const searchedStories = stories.filter((story) => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
 	return (
 		<div>
 			<h1>My Hacker Stories</h1>
 
-			<Search onSearch={handleSearch} />
+			<Search searchTerm={searchTerm} onSearch={handleSearch} />
 
 			<hr />
 
-			<List list={stories} />
+			<List list={searchedStories} />
 		</div>
 	);
 };
 
 const Search = (props) => {
-	const [searchTerm, setSearchTerm] = useState('');
-
-	const handleChange = (e) => {
-		setSearchTerm(e.target.value);
-
-		props.onSearch(e);
-	};
-
 	return (
 		<div>
 			<label htmlFor="search">Search: </label>
-			<input id="search" type="text" onChange={handleChange} />
+			<input id="search" type="text" onChange={props.onSearch} />
 
 			<p>
-				Searching for <strong>{searchTerm}</strong>
+				Searching for <strong>{props.searchTerm}</strong>
 			</p>
 		</div>
 	);
