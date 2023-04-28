@@ -1,6 +1,6 @@
 // ! Notes at bottom
 
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 
 const useStorageState = (key, initialState) => {
 	const [value, setValue] = useState(localStorage.getItem(key) || initialState);
@@ -34,29 +34,49 @@ const initialStories = [
 const getAsyncStories = () =>
 	new Promise((resolve) => setTimeout(() => resolve({ data: { stories: initialStories } }), 2000));
 
+const storiesReducer = (state, action) => {
+	switch (action.type) {
+		case 'SET_STORIES':
+			return action.payload;
+		case 'REMOVE_STORY':
+			return state.filter((story) => action.payload.objectID !== story.objectID);
+		default:
+			throw new Error();
+	}
+};
+
 const App = () => {
 	const [searchTerm, setSearchTerm] = useStorageState('search', 'React');
 
 	// Callback handler, allows parent to see state of child
 	const handleSearch = (e) => setSearchTerm(e.target.value);
 
-	const [stories, setStories] = useState([]);
+	// The new hook receives a reducer function and an initial state as arguments and returns an array with 2 items (current state, state updater function AKA dispatch function)
+	const [stories, dispatchStories] = useReducer(storiesReducer, []);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 
 	useEffect(() => {
 		setIsLoading(true);
 
-		getAsyncStories().then((result) => {
-			setStories(result.data.stories);
-			setIsLoading(false).catch(() => setIsError(true));
-		});
+		getAsyncStories()
+			.then((result) => {
+				// Updated from previous `setStories`
+				dispatchStories({
+					type: 'SET_STORIES',
+					payload: result.data.stories,
+				});
+				setIsLoading(false);
+			})
+			.catch(() => setIsError(true));
 	}, []);
 
 	const handleRemoveStory = (item) => {
-		const newStories = stories.filter((story) => item.objectID !== story.objectID);
-
-		setStories(newStories);
+		// Updated from previous `setStories`
+		dispatchStories({
+			type: 'REMOVE_STORY',
+			payload: item,
+		});
 	};
 
 	const searchedStories = stories.filter((story) => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -160,4 +180,28 @@ export default App;
     - custom hooks should be reusable
 
   > INLINE HANDLERS: Inline handlers are useful in child components when callback handlers require some sort of parameter, for example a current item. The `onClick` attribute returns the event object by default, but by using the inline handler, you can send specific information back
+
+  > USEREDUCER: The useReducer hook enables one to use more sophisticated state management for complex state structures.
+    - The state processed by a reducer function is immutable - it always returns a new state object
+    - It is recommended to use the spread ({ ...object }) operator to keep state the same except for the properties we are changing.
+
+      const personReducer = (person, action) => {
+        switch (action.type) {
+          case 'INCREASE_AGE':
+            return { ...person, age: person.age + 1 };
+          case 'CHANGE_LASTNAME':
+            return { ...person, lastname: action.lastname };
+          default:
+            return person;
+        }
+      }
+    
+    - An action provided to a reducer function can have an optional payload (this would change our example above to dig deeper into the action object `action.payload.lastname`)
+
+      const action = {
+        type: 'CHANGE_LASTNAME',
+        payload: {
+          lastname: 'Doe'
+        }
+      }
  */
