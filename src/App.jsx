@@ -36,10 +36,30 @@ const getAsyncStories = () =>
 
 const storiesReducer = (state, action) => {
 	switch (action.type) {
-		case 'SET_STORIES':
-			return action.payload;
+		case 'STORIES_FETCH_INIT':
+			return {
+				...state,
+				isLoading: true,
+				isError: false,
+			};
+		case 'STORIES_FETCH_SUCCESS':
+			return {
+				...state,
+				isLoading: false,
+				isError: false,
+				data: action.payload,
+			};
+		case 'STORIES_FETCH_FAILURE':
+			return {
+				...state,
+				isLoading: false,
+				isError: true,
+			};
 		case 'REMOVE_STORY':
-			return state.filter((story) => action.payload.objectID !== story.objectID);
+			return {
+				...state,
+				data: state.data.filter((story) => action.payload.objectID !== story.objectID),
+			};
 		default:
 			throw new Error();
 	}
@@ -52,23 +72,20 @@ const App = () => {
 	const handleSearch = (e) => setSearchTerm(e.target.value);
 
 	// The new hook receives a reducer function and an initial state as arguments and returns an array with 2 items (current state, state updater function AKA dispatch function)
-	const [stories, dispatchStories] = useReducer(storiesReducer, []);
-	const [isLoading, setIsLoading] = useState(false);
-	const [isError, setIsError] = useState(false);
+	const [stories, dispatchStories] = useReducer(storiesReducer, { data: [], isLoading: false, isError: false });
 
 	useEffect(() => {
-		setIsLoading(true);
+		dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
 		getAsyncStories()
 			.then((result) => {
 				// Updated from previous `setStories`
 				dispatchStories({
-					type: 'SET_STORIES',
+					type: 'STORIES_FETCH_SUCCESS',
 					payload: result.data.stories,
 				});
-				setIsLoading(false);
 			})
-			.catch(() => setIsError(true));
+			.catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' }));
 	}, []);
 
 	const handleRemoveStory = (item) => {
@@ -79,7 +96,7 @@ const App = () => {
 		});
 	};
 
-	const searchedStories = stories.filter((story) => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
+	const searchedStories = stories.data.filter((story) => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
 	return (
 		<div>
@@ -91,9 +108,9 @@ const App = () => {
 
 			<hr />
 
-			{isError && <p>Something went wrong...</p>}
+			{stories.isError && <p>Something went wrong...</p>}
 
-			{isLoading ? <p>Loading...</p> : <List list={searchedStories} onRemoveItem={handleRemoveStory} />}
+			{stories.isLoading ? <p>Loading...</p> : <List list={searchedStories} onRemoveItem={handleRemoveStory} />}
 		</div>
 	);
 };
