@@ -1,5 +1,5 @@
 // ! Notes at bottom
-
+import axios from 'axios';
 import { useCallback, useEffect, useReducer, useState } from 'react';
 
 const useStorageState = (key, initialState) => {
@@ -55,18 +55,19 @@ const App = () => {
 
 	const [stories, dispatchStories] = useReducer(storiesReducer, { data: [], isLoading: false, isError: false });
 
-	const handleFetchStories = useCallback(() => {
+	const handleFetchStories = useCallback(async () => {
 		dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
-		fetch(url)
-			.then((response) => response.json())
-			.then((result) => {
-				dispatchStories({
-					type: 'STORIES_FETCH_SUCCESS',
-					payload: result.hits,
-				});
-			})
-			.catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' }));
+		try {
+			const result = await axios.get(url);
+
+			dispatchStories({
+				type: 'STORIES_FETCH_SUCCESS',
+				payload: result.data.hits,
+			});
+		} catch (error) {
+			dispatchStories({ type: 'STORIES_FETCH_FAILURE' });
+		}
 	}, [url]);
 
 	useEffect(() => {
