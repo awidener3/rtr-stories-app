@@ -47,18 +47,18 @@ const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
 const App = () => {
 	const [searchTerm, setSearchTerm] = useStorageState('search', 'React');
+	const [url, setUrl] = useState(`${API_ENDPOINT}${searchTerm}`);
 
-	const handleSearch = (e) => setSearchTerm(e.target.value);
+	const handleSearchInput = (e) => setSearchTerm(e.target.value);
+
+	const handleSearchSubmit = () => setUrl(`${API_ENDPOINT}${searchTerm}`);
 
 	const [stories, dispatchStories] = useReducer(storiesReducer, { data: [], isLoading: false, isError: false });
 
-	// This is the logic that was originally in the `useEffect()` below, but now it is reusable.
 	const handleFetchStories = useCallback(() => {
-		if (!searchTerm) return;
-
 		dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
-		fetch(`${API_ENDPOINT}${searchTerm}`)
+		fetch(url)
 			.then((response) => response.json())
 			.then((result) => {
 				dispatchStories({
@@ -67,7 +67,7 @@ const App = () => {
 				});
 			})
 			.catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' }));
-	}, [searchTerm]);
+	}, [url]);
 
 	useEffect(() => {
 		handleFetchStories();
@@ -84,9 +84,13 @@ const App = () => {
 		<div>
 			<h1>My Hacker Stories</h1>
 
-			<InputWithLabel id="search" label="Search" value={searchTerm} isFocused onInputChange={handleSearch}>
+			<InputWithLabel id="search" label="Search" value={searchTerm} isFocused onInputChange={handleSearchInput}>
 				<strong>Search:</strong>
 			</InputWithLabel>
+
+			<button type="button" disabled={!searchTerm} onClick={handleSearchSubmit}>
+				Search
+			</button>
 
 			<hr />
 
