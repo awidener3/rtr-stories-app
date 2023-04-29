@@ -12,28 +12,6 @@ const useStorageState = (key, initialState) => {
 	return [value, setValue];
 };
 
-const initialStories = [
-	{
-		title: 'React',
-		url: 'https://reactjs.org/',
-		author: 'Jordan Walke',
-		num_comments: 3,
-		points: 4,
-		objectID: 0,
-	},
-	{
-		title: 'Redux',
-		url: 'https://redux.js.org/',
-		author: 'Dan Abramov, Andrew Clark',
-		num_comments: 2,
-		points: 5,
-		objectID: 1,
-	},
-];
-
-const getAsyncStories = () =>
-	new Promise((resolve) => setTimeout(() => resolve({ data: { stories: initialStories } }), 2000));
-
 const storiesReducer = (state, action) => {
 	switch (action.type) {
 		case 'STORIES_FETCH_INIT':
@@ -65,6 +43,8 @@ const storiesReducer = (state, action) => {
 	}
 };
 
+const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
+
 const App = () => {
 	const [searchTerm, setSearchTerm] = useStorageState('search', 'React');
 
@@ -77,12 +57,14 @@ const App = () => {
 	useEffect(() => {
 		dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
-		getAsyncStories()
+		// Removing fake API with new endpoint
+		fetch(`${API_ENDPOINT}React`)
+			.then((response) => response.json())
 			.then((result) => {
-				// Updated from previous `setStories`
 				dispatchStories({
 					type: 'STORIES_FETCH_SUCCESS',
-					payload: result.data.stories,
+					// Adapting to new API
+					payload: result.hits,
 				});
 			})
 			.catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' }));
