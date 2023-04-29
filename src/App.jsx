@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { memo, useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 
 import './index.css';
 import './App.css';
@@ -55,6 +55,12 @@ const storiesReducer = (state, action) => {
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
+const getSumComments = (stories) => {
+	console.log('C');
+
+	return stories.data.reduce((result, value) => result + value.num_comments, 0);
+};
+
 const App = () => {
 	console.log('B:App');
 	const [searchTerm, setSearchTerm] = useStorageState('search', 'React');
@@ -96,9 +102,12 @@ const App = () => {
 		});
 	}, []);
 
+	// Stops `getSumComments()` from running on each render
+	const sumComments = useMemo(() => getSumComments(stories), [stories]);
+
 	return (
 		<div className="container">
-			<h1 className="headline-primary">My Hacker Stories</h1>
+			<h1 className="headline-primary">My Hacker Stories with {sumComments} comments.</h1>
 
 			<SearchForm searchTerm={searchTerm} onSearchSubmit={handleSearchSubmit} onSearchInput={handleSearchInput} />
 
