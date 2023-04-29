@@ -1,6 +1,8 @@
-// ! Notes at bottom
 import axios from 'axios';
 import { useCallback, useEffect, useReducer, useState } from 'react';
+
+import './index.css';
+import './App.css';
 
 const useStorageState = (key, initialState) => {
 	const [value, setValue] = useState(localStorage.getItem(key) || initialState);
@@ -85,12 +87,10 @@ const App = () => {
 	};
 
 	return (
-		<div>
-			<h1>My Hacker Stories</h1>
+		<div className="container">
+			<h1 className="headline-primary">My Hacker Stories</h1>
 
 			<SearchForm searchTerm={searchTerm} onSearchSubmit={handleSearchSubmit} onSearchInput={handleSearchInput} />
-
-			<hr />
 
 			{stories.isError && <p>Something went wrong...</p>}
 
@@ -100,12 +100,12 @@ const App = () => {
 };
 
 const SearchForm = ({ searchTerm, onSearchSubmit, onSearchInput }) => (
-	<form onSubmit={onSearchSubmit}>
+	<form onSubmit={onSearchSubmit} className="search-form">
 		<InputWithLabel id="search" label="Search" value={searchTerm} isFocused onInputChange={onSearchInput}>
 			<strong>Search:</strong>
 		</InputWithLabel>
 
-		<button type="submit" disabled={!searchTerm}>
+		<button type="submit" disabled={!searchTerm} className="button button_large">
 			Search
 		</button>
 	</form>
@@ -114,9 +114,11 @@ const SearchForm = ({ searchTerm, onSearchSubmit, onSearchInput }) => (
 const InputWithLabel = ({ id, value, type = 'text', onInputChange, isFocused, children }) => {
 	return (
 		<>
-			<label htmlFor={id}>{children}</label>
+			<label htmlFor={id} className="label">
+				{children}
+			</label>
 			&nbsp;
-			<input id={id} type={type} value={value} autoFocus={isFocused} onChange={onInputChange} />
+			<input id={id} type={type} value={value} autoFocus={isFocused} onChange={onInputChange} className="input" />
 		</>
 	);
 };
@@ -137,15 +139,15 @@ const Item = ({ item, onRemoveItem }) => {
 	};
 
 	return (
-		<li>
-			<span>
+		<li className="item">
+			<span className={{ width: '40%' }}>
 				<a href={item.url}>{item.title}</a>
 			</span>
-			<span>{item.author}</span>
-			<span>{item.num_comments}</span>
-			<span>{item.points}</span>
+			<span className={{ width: '30%' }}>{item.author}</span>
+			<span className={{ width: '10%' }}>{item.num_comments}</span>
+			<span className={{ width: '10%' }}>{item.points}</span>
 			<span>
-				<button type="button" onClick={handleRemoveItem}>
+				<button type="button" onClick={handleRemoveItem} className="button button_small">
 					Dismiss
 				</button>
 			</span>
