@@ -1,14 +1,22 @@
 import axios from 'axios';
-import { useCallback, useEffect, useReducer, useState } from 'react';
+import { memo, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 
 import './index.css';
 import './App.css';
 
 const useStorageState = (key, initialState) => {
+	const isMounted = useRef(false); // made up state
 	const [value, setValue] = useState(localStorage.getItem(key) || initialState);
 
 	useEffect(() => {
-		localStorage.setItem(key, value);
+		if (!isMounted.current) {
+			console.log('A');
+			// runs on render
+			isMounted.current = true;
+		} else {
+			// runs on re-render
+			localStorage.setItem(key, value);
+		}
 	}, [value, key]);
 
 	return [value, setValue];
@@ -48,6 +56,7 @@ const storiesReducer = (state, action) => {
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
 const App = () => {
+	console.log('B:App');
 	const [searchTerm, setSearchTerm] = useStorageState('search', 'React');
 	const [url, setUrl] = useState(`${API_ENDPOINT}${searchTerm}`);
 
@@ -79,12 +88,13 @@ const App = () => {
 		handleFetchStories();
 	}, [handleFetchStories]);
 
-	const handleRemoveStory = (item) => {
+	// useCallback here so that a new version of this function is not created when App re-renders. This stops <List /> from experiencing an unnecessary update.
+	const handleRemoveStory = useCallback((item) => {
 		dispatchStories({
 			type: 'REMOVE_STORY',
 			payload: item,
 		});
-	};
+	}, []);
 
 	return (
 		<div className="container">
@@ -123,15 +133,17 @@ const InputWithLabel = ({ id, value, type = 'text', onInputChange, isFocused, ch
 	);
 };
 
-const List = ({ list, onRemoveItem }) => {
-	return (
-		<ul>
-			{list.map((item) => (
-				<Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
-			))}
-		</ul>
-	);
-};
+// eslint-disable-next-line react/display-name
+const List = memo(
+	({ list, onRemoveItem }) =>
+		console.log('B:List') || (
+			<ul>
+				{list.map((item) => (
+					<Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
+				))}
+			</ul>
+		)
+);
 
 const Item = ({ item, onRemoveItem }) => {
 	const handleRemoveItem = () => {
