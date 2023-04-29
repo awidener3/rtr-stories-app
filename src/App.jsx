@@ -55,30 +55,27 @@ const App = () => {
 	const [stories, dispatchStories] = useReducer(storiesReducer, { data: [], isLoading: false, isError: false });
 
 	useEffect(() => {
+		if (!searchTerm) return;
+
 		dispatchStories({ type: 'STORIES_FETCH_INIT' });
 
-		// Removing fake API with new endpoint
-		fetch(`${API_ENDPOINT}React`)
+		fetch(`${API_ENDPOINT}${searchTerm}`)
 			.then((response) => response.json())
 			.then((result) => {
 				dispatchStories({
 					type: 'STORIES_FETCH_SUCCESS',
-					// Adapting to new API
 					payload: result.hits,
 				});
 			})
 			.catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' }));
-	}, []);
+	}, [searchTerm]);
 
 	const handleRemoveStory = (item) => {
-		// Updated from previous `setStories`
 		dispatchStories({
 			type: 'REMOVE_STORY',
 			payload: item,
 		});
 	};
-
-	const searchedStories = stories.data.filter((story) => story.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
 	return (
 		<div>
@@ -92,7 +89,7 @@ const App = () => {
 
 			{stories.isError && <p>Something went wrong...</p>}
 
-			{stories.isLoading ? <p>Loading...</p> : <List list={searchedStories} onRemoveItem={handleRemoveStory} />}
+			{stories.isLoading ? <p>Loading...</p> : <List list={stories.data} onRemoveItem={handleRemoveStory} />}
 		</div>
 	);
 };
