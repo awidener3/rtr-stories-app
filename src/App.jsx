@@ -51,7 +51,10 @@ const App = () => {
 
 	const handleSearchInput = (e) => setSearchTerm(e.target.value);
 
-	const handleSearchSubmit = () => setUrl(`${API_ENDPOINT}${searchTerm}`);
+	const handleSearchSubmit = (e) => {
+		e.preventDefault();
+		setUrl(`${API_ENDPOINT}${searchTerm}`);
+	};
 
 	const [stories, dispatchStories] = useReducer(storiesReducer, { data: [], isLoading: false, isError: false });
 
@@ -85,13 +88,7 @@ const App = () => {
 		<div>
 			<h1>My Hacker Stories</h1>
 
-			<InputWithLabel id="search" label="Search" value={searchTerm} isFocused onInputChange={handleSearchInput}>
-				<strong>Search:</strong>
-			</InputWithLabel>
-
-			<button type="button" disabled={!searchTerm} onClick={handleSearchSubmit}>
-				Search
-			</button>
+			<SearchForm searchTerm={searchTerm} onSearchSubmit={handleSearchSubmit} onSearchInput={handleSearchInput} />
 
 			<hr />
 
@@ -101,6 +98,18 @@ const App = () => {
 		</div>
 	);
 };
+
+const SearchForm = ({ searchTerm, onSearchSubmit, onSearchInput }) => (
+	<form onSubmit={onSearchSubmit}>
+		<InputWithLabel id="search" label="Search" value={searchTerm} isFocused onInputChange={onSearchInput}>
+			<strong>Search:</strong>
+		</InputWithLabel>
+
+		<button type="submit" disabled={!searchTerm}>
+			Search
+		</button>
+	</form>
+);
 
 const InputWithLabel = ({ id, value, type = 'text', onInputChange, isFocused, children }) => {
 	return (
