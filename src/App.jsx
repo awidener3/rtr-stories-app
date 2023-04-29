@@ -1,6 +1,6 @@
 // ! Notes at bottom
 
-import { useEffect, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 
 const useStorageState = (key, initialState) => {
 	const [value, setValue] = useState(localStorage.getItem(key) || initialState);
@@ -48,13 +48,12 @@ const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 const App = () => {
 	const [searchTerm, setSearchTerm] = useStorageState('search', 'React');
 
-	// Callback handler, allows parent to see state of child
 	const handleSearch = (e) => setSearchTerm(e.target.value);
 
-	// The new hook receives a reducer function and an initial state as arguments and returns an array with 2 items (current state, state updater function AKA dispatch function)
 	const [stories, dispatchStories] = useReducer(storiesReducer, { data: [], isLoading: false, isError: false });
 
-	useEffect(() => {
+	// This is the logic that was originally in the `useEffect()` below, but now it is reusable.
+	const handleFetchStories = useCallback(() => {
 		if (!searchTerm) return;
 
 		dispatchStories({ type: 'STORIES_FETCH_INIT' });
@@ -69,6 +68,10 @@ const App = () => {
 			})
 			.catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' }));
 	}, [searchTerm]);
+
+	useEffect(() => {
+		handleFetchStories();
+	}, [handleFetchStories]);
 
 	const handleRemoveStory = (item) => {
 		dispatchStories({
@@ -200,4 +203,6 @@ export default App;
           lastname: 'Doe'
         }
       }
+
+    > MEMOIZED FUNCTIONS: By using the `useCallback()` hook, a function is memoized. This stops the function from being created each time the component re-renders.
  */
