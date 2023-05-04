@@ -10,7 +10,6 @@ const useStorageState = (key, initialState) => {
 
 	useEffect(() => {
 		if (!isMounted.current) {
-			console.log('A');
 			// runs on render
 			isMounted.current = true;
 		} else {
@@ -55,14 +54,9 @@ const storiesReducer = (state, action) => {
 
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
-const getSumComments = (stories) => {
-	console.log('C');
-
-	return stories.data.reduce((result, value) => result + value.num_comments, 0);
-};
+const getSumComments = (stories) => stories.data.reduce((result, value) => result + value.num_comments, 0);
 
 const App = () => {
-	console.log('B:App');
 	const [searchTerm, setSearchTerm] = useStorageState('search', 'React');
 	const [url, setUrl] = useState(`${API_ENDPOINT}${searchTerm}`);
 
@@ -125,7 +119,7 @@ const SearchForm = ({ searchTerm, onSearchSubmit, onSearchInput }) => (
 		</InputWithLabel>
 
 		<button type="submit" disabled={!searchTerm} className="button button_large">
-			Search
+			Submit
 		</button>
 	</form>
 );
