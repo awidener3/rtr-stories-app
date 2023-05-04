@@ -143,16 +143,13 @@ const InputWithLabel = ({ id, value, type = 'text', onInputChange, isFocused, ch
 };
 
 // eslint-disable-next-line react/display-name
-const List = memo(
-	({ list, onRemoveItem }) =>
-		console.log('B:List') || (
-			<ul>
-				{list.map((item) => (
-					<Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
-				))}
-			</ul>
-		)
-);
+const List = memo(({ list, onRemoveItem }) => (
+	<ul>
+		{list.map((item) => (
+			<Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
+		))}
+	</ul>
+));
 
 const Item = ({ item, onRemoveItem }) => {
 	const handleRemoveItem = () => {
@@ -161,12 +158,12 @@ const Item = ({ item, onRemoveItem }) => {
 
 	return (
 		<li className="item">
-			<span className={{ width: '40%' }}>
+			<span>
 				<a href={item.url}>{item.title}</a>
 			</span>
-			<span className={{ width: '30%' }}>{item.author}</span>
-			<span className={{ width: '10%' }}>{item.num_comments}</span>
-			<span className={{ width: '10%' }}>{item.points}</span>
+			<span>{item.author}</span>
+			<span>{item.num_comments}</span>
+			<span>{item.points}</span>
 			<span>
 				<button type="button" onClick={handleRemoveItem} className="button button_small">
 					Dismiss
